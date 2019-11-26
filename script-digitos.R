@@ -1,7 +1,16 @@
-# === Libraries ===
-# Pixmap for pnm image reading
+# ============================= Libraries =============================
+# Library for reading pnm images
 library(pixmap)
+
+#
 library(class)
+
+# Library for decision trees
+library(rpart)
+library(rpart.plot)
+
+# Library for SVM
+library(e1071)
 
 # Preparing data files & data structure
 # Read all files from directory
@@ -31,8 +40,7 @@ for (i in 1:length(files)) {
   dataframe_digits$class[i] <- substr(files[i], 1, 1)
 }
 
-# Create a sample, with 80% of the data amount, for training the AI model
-# (total, desired %)
+# Create a sample, with 80% of the data amount, for training the AI model (Params: total, desired %)
 imgSamples <- sample(nrow(dataframe_digits), (0.8 * nrow(dataframe_digits)))
 
 # Getting classes (last column) from the 80% train data
@@ -44,7 +52,8 @@ train <- dataframe_digits[imgSamples, -ncol(dataframe_digits)]
 # Getting test data from the 20% train data
 test <- dataframe_digits[-imgSamples, -ncol(dataframe_digits)]
 
-# === Classification ===
+# ============================= Classification =============================
+# ===== KNN (K-Nearest Neighbors) =====
 # Uses k-nearest neighbour for classification
 # KNN algorithm results, for four passed values (1, 3, 7 and 9)
 knnResult_1 <- as.vector(knn(train, test, number_classes))
@@ -76,14 +85,40 @@ for (i in 1:ncol(knnResultsDataset) - 1) {
   # Amount of 'true' divided by amount of rows = accuracy %
   knnAccuracy[i] <- true_frequency/nrow(knnResultsDataset)
 }
+# ===== SVM (Support Vector Machine) =====
+# Setting seed for random number generator
+set.seed(123)
 
+# Setting up training data 80%
+smp_size <- floor(0.8 * nrow(data))
+train_ind <- sample(seq_len(nrow(data)), size = smp_size)
+
+train <- data[train_ind, ]
+test <- data[-train_ind, ]
+
+testClass<-test[,5]
+test<-test[,-5]
+
+
+classifier = svm(formula = Species ~ ., 
+                 data = train, 
+                 type = 'C-classification', 
+                 kernel = 'linear') 
+
+y_pred = predict(classifier, newdata = test) 
+
+# ===== Decision Tree =====
+# ===== KNN =====
+
+# ============================= Clusterização ============================= 
 
 # Projeto 2
 # Utilizando o dataset de dígitos escritos à mão, realize as seguintes tarefas de machine
 # learning:
-#  - Classificação
+#  - Classificação.
 #  - Clusterização.
 # Verifique a acurácia destes algoritmos.
+
 # Aplique PCA para realizar a redução de dimensionalidade. Aplique os algoritmos
 # novamente, e verifique a acurácia. Houve alguma melhora na acurácia para este caso?
 #  Entrega:
