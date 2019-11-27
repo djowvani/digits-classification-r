@@ -1,3 +1,12 @@
+---
+title: "Digits Classification"
+output: html_notebook
+---
+
+<h1>Giovani Anhesini Bezerra - 17172164</h1>
+<h1>Victor Hugo Morelli Monge - 17133802</h1>
+
+```{r}
 # ============================= Libraries =============================
 # Library for reading pnm images
 library(pixmap)
@@ -18,7 +27,9 @@ library(factoextra)
   
 # Library for Confusion Matrix
 library(caret)
+```
 
+```{r}
 # ============================= Read Files =============================
 # Preparing data files & data structure
 # Read all files from directory
@@ -62,7 +73,9 @@ train <- dataframe_digits[imgSamples, -4097]
 
 # Getting test data from the 20% train data
 test <- dataframe_digits[-imgSamples, -4097]
+```
 
+```{r}
 # ============================= Classification Analysis =============================
 # ===== KNN (K-Nearest Neighbors) =====
 # Uses k-nearest neighbour for classification
@@ -92,7 +105,9 @@ knnAccuracy[1] <- length(which(knnResult_1 == expectedResult))/length(expectedRe
 knnAccuracy[2] <- length(which(knnResult_3 == expectedResult))/length(expectedResult)
 knnAccuracy[3] <- length(which(knnResult_7 == expectedResult))/length(expectedResult)
 knnAccuracy[4] <- length(which(knnResult_9 == expectedResult))/length(expectedResult)
+```
 
+```{r}
 # ===== SVM (Support Vector Machine) =====
 # Getting round value for 80% of total row lines from the dataframe
 sample_80percent <- floor(0.8 * nrow(dataframe_digits))
@@ -122,7 +137,9 @@ y_pred = predict(classifier, newdata = test)
 
 # Accuracy measures for SVM
 svmAccuracy <- length(which(knnResult_1 == expectedResult))/length(expectedResult)
+```
 
+```{r}
 # ===== Decision Tree =====
 # Setting seed for random number generator (for each time we need a new train set)
 set.seed(123)
@@ -151,7 +168,8 @@ pred <- predict(decisionTree, test, type = "class") # Prob or class
 
 # Accuracy measures for Decision Tree
 treeAccuracy <- length(which(pred == expectedResult))/length(expectedResult)
-
+```
+```{r}
 # =============================== Clustering Analysis ===============================
 # ===== K-Means =====
 # Getting classes
@@ -166,157 +184,5 @@ table(predict$cluster)
 # S3 method for kmeans
 fitted(object, method = c("centers", "classes"), ...)
 
-# ===================================== PCA ========================================
-# 
-digits_pca <- prcomp(dataframe_digits[,c(1:7,10,11)], center = TRUE, scale. = TRUE)
+```
 
-# 
-summary(digits_pca)
-
-# 
-fviz_eig(digits_pca)
-fviz_pca_ind(digits_pca,col.ind = "black", # Color by the quality of representation
-             repel = TRUE # Avoid text overlapping
-            )
-
-fviz_pca_var(mtcars.pca,
-             col.var = "contrib", # Color by contributions to the PC
-             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
-             repel = TRUE # Avoid text overlapping
-            )
-#90 graus n?o correlacionadas
-#180 graus negativamente correlacionadas
-#angulo pequeno muito correlacionadas.
-
-fviz_pca_biplot(mtcars.pca, repel = TRUE,
-                col.var = "#2E9FDF", # Variables color
-                col.ind = "#696969"  # Individuals color
-)
-
-
-
-#PCA iris
-
-
-irs.pca <- prcomp(iris[,1:4], center = TRUE,scale. = TRUE)
-summary(irs.pca)
-
-install.packages("factoextra")
-library(factoextra)
-fviz_eig(irs.pca)
-fviz_pca_ind(irs.pca,geom.ind = "point", pointshape = 21,
-             pointsize = 2, 
-             col.ind = "black", # Color by the quality of representation
-             palette = "jco", 
-             repel=TRUE,# Avoid text overlapping
-             addEllipses = TRUE,
-             label = "var",
-             col.var = "black",
-             fill.ind = iris[,5]
-            )
-
-fviz_pca_var(irs.pca,
-             col.var = "contrib", # Color by contributions to the PC
-             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
-             repel = TRUE     # Avoid text overlapping
-            )
-
-fviz_pca_biplot(irs.pca,geom.ind = "point", pointshape = 21,
-                pointsize = 2, 
-                col.ind = "black", # Color by the quality of representation
-                palette = "jco", 
-                repel=TRUE,# Avoid text overlapping
-                addEllipses = TRUE,
-                label = "var",
-                #                
-                fill.ind = iris[,5],
-                col.var = "contrib", # Color by contributions to the PC
-                gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07")
-                )
-
-# ===== KNN (Post-PCA) =====
-knnResult_1 <- as.vector(knn(train, test, number_classes))
-knnResult_3 <- as.vector(knn(train, test, number_classes, k = 3))
-knnResult_7 <- as.vector(knn(train, test, number_classes, k = 7))
-knnResult_9 <- as.vector(knn(train, test, number_classes, k = 9))
-
-knnResultsDataset <- as.data.frame(knnResult_1)
-knnResultsDataset[,2] <- as.data.frame(knnResult_3)
-knnResultsDataset[,3] <- as.data.frame(knnResult_7)
-knnResultsDataset[,4] <- as.data.frame(knnResult_9)
-
-expectedResult <- as.vector(dataframe_digits[-imgSamples, ncol(dataframe_digits)])
-
-knnResultsDataset[,5] <- as.data.frame(expectedResult)
-
-knnAccuracy <- vector()
-
-for (i in 1:ncol(knnResultsDataset) - 1) {
-  true_false_table <- table(knnResultsDataset[,i] == knnResultsDataset[,5])
-  true_frequency <- true_false_table[names(true_false_table) == TRUE]
-  knnAccuracy[i] <- true_frequency/nrow(knnResultsDataset)
-}
-
-# ===== SVM (Post-PCA) =====
-sample_80percent <- floor(0.8 * nrow(dataframe_digits))
-
-train_index <- sample(seq_len(nrow(dataframe_digits)), size = sample_80percent)
-
-train <- dataframe_digits[train_index, ]
-test <- dataframe_digits[-train_index, ]
-
-testClass <- test[,4097]
-test <- test[,-4097]
-
-classifier = svm(formula = digit_class ~ ., 
-                 data = train,
-                 type = 'C-classification', 
-                 kernel = 'linear'
-)
-
-y_pred = predict(classifier, newdata = test)
-
-svmAccuracy <- length(which(knnResult_1 == expectedResult))/length(expectedResult)
-
-# ===== Decision Tree (Post-PCA) =====
-set.seed(123)
-
-sample_80percent <- floor(0.8 * nrow(dataframe_digits))
-
-train_index <- sample(seq_len(nrow(dataframe_digits)), size = sample_80percent)
-
-train <- dataframe_digits[train_index, ]
-test <- dataframe_digits[-train_index, ]
-
-decisionTree <- rpart(digit_class ~ ., train, method = "class", control = rpart.control(minsplit = 1))
-
-plot <- rpart.plot(decisionTree, type = 3)
-
-classif <- test[,ncol(dataframe_digits)]
-test <- test[,-ncol(dataframe_digits)]
-pred <- predict(decisionTree, test, type = "class")
-
-treeAccuracy <- length(which(pred == expectedResult))/length(expectedResult)
-
-# ===== K-Means (Post-PCA) =====
-
-# ===================================== Plots ========================================
-
-
-# Projeto 2
-# Utilizando o dataset de dígitos escritos à mão, realize as seguintes tarefas de machine
-# learning:
-#  - Classificação.
-#  - Clusterização.
-# Verifique a acurácia destes algoritmos.
-
-# Aplique PCA para realizar a redução de dimensionalidade. Aplique os algoritmos
-# novamente, e verifique a acurácia. Houve alguma melhora na acurácia para este caso?
-#  Entrega:
-#  O projeto deve ser realizado em duplas.
-# Cada dupla deverá entregar um relatório contendo:
-#  - gráficos de visualização dos dados que sejam de interesse para entendimento do
-# problema;
-#  - Acurácia dos algoritmos;
-#  - Código fonte R.
-# Data de entrega: 27/11
